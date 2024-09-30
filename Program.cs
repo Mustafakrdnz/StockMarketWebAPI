@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using StockMarketWebAPI.Data;
+
 namespace StockMarketWebAPI
 {
     public class Program
@@ -13,6 +16,11 @@ namespace StockMarketWebAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddDbContext<ApplicationDBContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             var app = builder.Build();
 
