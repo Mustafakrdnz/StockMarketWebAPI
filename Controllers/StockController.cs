@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockMarketWebAPI.Data;
+using StockMarketWebAPI.Dtos.Stock;
+using StockMarketWebAPI.Mappers;
 using StockMarketWebAPI.Models;
 
 namespace StockMarketWebAPI.Controllers
@@ -23,9 +25,11 @@ namespace StockMarketWebAPI.Controllers
 
         // GET: api/Stock
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Stock>>> GetStocks()
+        public async Task<ActionResult<IEnumerable<StockDto>>> GetStocks()
         {
-            return await _context.Stocks.ToListAsync();
+            var stocks = await _context.Stocks.ToListAsync();
+
+            return Ok(stocks.Select(stock => stock.ToStockDto()));
         }
 
         // GET: api/Stock/5
@@ -39,7 +43,7 @@ namespace StockMarketWebAPI.Controllers
                 return NotFound();
             }
 
-            return stock;
+            return Ok(stock.ToStockDto());
         }
 
         // PUT: api/Stock/5
