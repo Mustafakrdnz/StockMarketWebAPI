@@ -23,7 +23,7 @@ namespace StockMarketWebAPI.Controllers
             _context = context;
         }
 
-        // GET: api/Stock
+        // GET: api/Stock  
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StockDto>>> GetStocks()
         {
@@ -80,12 +80,19 @@ namespace StockMarketWebAPI.Controllers
         // POST: api/Stock
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Stock>> PostStock(Stock stock)
-        {
-            _context.Stocks.Add(stock);
-            await _context.SaveChangesAsync();
+        //public async Task<ActionResult<Stock>> PostStock(Stock stock)
+        //{
+        //    _context.Stocks.Add(stock);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetStock", new { id = stock.Id }, stock);
+        //    return CreatedAtAction("GetStock", new { id = stock.Id }, stock);
+        //}
+        public IActionResult Create([FromBody] CreateStockRequestDto stockDto) 
+        { 
+            var stockModel = stockDto.ToStockFromCreateDto();
+            _context.Stocks.Add(stockModel);
+            _context.SaveChanges();
+            return CreatedAtAction(nameof(GetStock), new { id = stockModel.Id }, stockModel.ToStockDto());
         }
 
         // DELETE: api/Stock/5
