@@ -50,7 +50,7 @@ namespace StockMarketWebAPI.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
 
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
+        public async Task<IActionResult> UpdateStock([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
         {
             var stockModel = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
             if (stockModel == null)
@@ -73,7 +73,7 @@ namespace StockMarketWebAPI.Controllers
         // POST: api/Stock
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto)
+        public async Task<IActionResult> CreateStock([FromBody] CreateStockRequestDto stockDto)
         {
             var stockModel = stockDto.ToStockFromCreateDto();
             _context.Stocks.Add(stockModel);
@@ -83,25 +83,20 @@ namespace StockMarketWebAPI.Controllers
         }
 
 
-        // DELETE: api/Stock/5
+        // DELETE: api/Stock/5 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStock(int id)
+        public async Task<IActionResult> DeleteStock([FromRoute]int id)
         {
-            var stock = await _context.Stocks.FindAsync(id);
-            if (stock == null)
+            var stockModel = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+            if (stockModel == null)
             {
                 return NotFound();
             }
 
-            _context.Stocks.Remove(stock);
+            _context.Stocks.Remove(stockModel);
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool StockExists(int id)
-        {
-            return _context.Stocks.Any(e => e.Id == id);
         }
     }
 }
