@@ -49,51 +49,39 @@ namespace StockMarketWebAPI.Controllers
         // PUT: api/Stock/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutStock(int id, Stock stock)
+
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
         {
-            if (id != stock.Id)
+            var stockModel = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+            if (stockModel == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(stock).State = EntityState.Modified;
+            stockModel.Symbol = updateDto.Symbol;
+            stockModel.CompanyName = updateDto.CompanyName;
+            stockModel.Purchase = updateDto.Purchase;
+            stockModel.LastDiv = updateDto.LastDiv;
+            stockModel.Industry = updateDto.Industry;
+            stockModel.MarketCap = updateDto.MarketCap;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StockExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(stockModel.ToStockDto());
         }
 
         // POST: api/Stock
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        //public async Task<ActionResult<Stock>> PostStock(Stock stock)
-        //{
-        //    _context.Stocks.Add(stock);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetStock", new { id = stock.Id }, stock);
-        //}
-        public IActionResult Create([FromBody] CreateStockRequestDto stockDto) 
-        { 
+        public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto)
+        {
             var stockModel = stockDto.ToStockFromCreateDto();
             _context.Stocks.Add(stockModel);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetStock), new { id = stockModel.Id }, stockModel.ToStockDto());
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetStock", new { id = stockModel.Id }, stockModel.ToStockDto());
         }
+
 
         // DELETE: api/Stock/5
         [HttpDelete("{id}")]
