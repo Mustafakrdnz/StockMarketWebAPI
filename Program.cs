@@ -1,6 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using StockMarketWebAPI.Data;
+using StockMarketWebAPI.Interfaces;
+using StockMarketWebAPI.Repository;
 
 namespace StockMarketWebAPI
 {
@@ -21,6 +23,8 @@ namespace StockMarketWebAPI
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
+            builder.Services.AddScoped<IStockRepository, StockRepository>();
 
             var app = builder.Build();
 
