@@ -17,13 +17,13 @@ namespace StockMarketWebAPI.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
-        private readonly ApplicationDBContext _context;
         private readonly ICommentRepository _commentRepo;
+        private readonly IStockRepository _stokcRepo;
 
-        public CommentController(ApplicationDBContext context, ICommentRepository commentRepo)
+        public CommentController(ICommentRepository commentRepo, IStockRepository stockRepo)
         {
-            _context = context;
             _commentRepo = commentRepo;
+            _stokcRepo = stockRepo;
         }
 
         // GET: api/Comment
@@ -39,79 +39,58 @@ namespace StockMarketWebAPI.Controllers
 
         // GET: api/Comment/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Comment>> GetComment(int id)
+        public async Task<IActionResult> GetComment([FromRoute]int id)
         {
-            var comment = await _context.Comments.FindAsync(id);
+            var comment = await _commentRepo.GetByIdAsync(id);
 
             if (comment == null)
             {
                 return NotFound();
             }
 
-            return comment;
+            return Ok(comment.ToCommentDto());
         }
 
         // PUT: api/Comment/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, Comment comment)
+        public async Task<IActionResult> PutComment([FromRoute]int id, [FromBody] UpdateCommentRequestDto updateDto)
         {
-            if (id != comment.Id)
-            {
-                return BadRequest();
-            }
+            var comment = await _commentRepo.UpdateAsync(id, updateDto.ToCommentFromUpdate());
 
-            _context.Entry(comment).State = EntityState.Modified;
-
-            try
+            if (comment == null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound("Comment not found");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CommentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(comment.ToCommentDto());
         }
 
         // POST: api/Comment
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Comment>> PostComment(Comment comment)
+        [HttpPost("{stockId}")]
+        public async Task<IActionResult> PostComment([FromRoute] int stockId, CreateCommentDto commentDto)
         {
-            _context.Comments.Add(comment);
-            await _context.SaveChangesAsync();
+            if(!await _stokcRepo.StockExists(stockId))
+            {
+                return BadRequest("Stock does not exist");
+            }
 
-            return CreatedAtAction("GetComment", new { id = comment.Id }, comment);
+            var commentModel = commentDto.ToCommentFromCreate(stockId);
+            await _commentRepo.CreateAsync(commentModel);
+            return CreatedAtAction(nameof(GetComment), new {id = commentModel.Id}, commentModel.ToCommentDto());
         }
 
         // DELETE: api/Comment/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComment(int id)
+        public async Task<IActionResult> DeleteComment([FromRoute]int id)
         {
-            var comment = await _context.Comments.FindAsync(id);
-            if (comment == null)
+            var commentModel = await _commentRepo.DeleteAsync(id);
+
+            if (commentModel == null)
             {
-                return NotFound();
+                return NotFound("Comment does not exist");
             }
-
-            _context.Comments.Remove(comment);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CommentExists(int id)
-        {
-            return _context.Comments.Any(e => e.Id == id);
+            return Ok(commentModel);
         }
     }
 }
