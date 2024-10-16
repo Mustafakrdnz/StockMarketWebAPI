@@ -30,6 +30,11 @@ namespace StockMarketWebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetComments()
         {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var comments = await _commentRepo.GetAllAsync();
 
             var CommentDto = comments.Select(c => c.ToCommentDto());
@@ -38,9 +43,14 @@ namespace StockMarketWebAPI.Controllers
         }
 
         // GET: api/Comment/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetComment([FromRoute]int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var comment = await _commentRepo.GetByIdAsync(id);
 
             if (comment == null)
@@ -53,9 +63,14 @@ namespace StockMarketWebAPI.Controllers
 
         // PUT: api/Comment/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> PutComment([FromRoute]int id, [FromBody] UpdateCommentRequestDto updateDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var comment = await _commentRepo.UpdateAsync(id, updateDto.ToCommentFromUpdate());
 
             if (comment == null)
@@ -67,10 +82,14 @@ namespace StockMarketWebAPI.Controllers
 
         // POST: api/Comment
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("{stockId}")]
+        [HttpPost("{stockId:int}")]
         public async Task<IActionResult> PostComment([FromRoute] int stockId, CreateCommentDto commentDto)
         {
-            if(!await _stokcRepo.StockExists(stockId))
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (!await _stokcRepo.StockExists(stockId))
             {
                 return BadRequest("Stock does not exist");
             }
@@ -81,9 +100,14 @@ namespace StockMarketWebAPI.Controllers
         }
 
         // DELETE: api/Comment/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteComment([FromRoute]int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var commentModel = await _commentRepo.DeleteAsync(id);
 
             if (commentModel == null)

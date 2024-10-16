@@ -12,7 +12,7 @@ namespace StockMarketWebAPI.Models
         [Column(TypeName = "decimal(18, 2)")]
         public decimal LastDiv { get; set; }
         public string Industry { get; set; } = string.Empty;
-        public string? MarketCap { get; set; } // it should be a long type, but it's a string for now cuz i forgot to change it
+        public long MarketCap { get; set; }
         public List<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

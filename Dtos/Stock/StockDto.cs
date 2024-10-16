@@ -11,7 +11,7 @@ namespace StockMarketWebAPI.Dtos.Stock
         public decimal Purchase { get; set; }
         public decimal LastDiv { get; set; }
         public string Industry { get; set; } = string.Empty;
-        public string? MarketCap { get; set; }
+        public long MarketCap { get; set; }
         public List<CommentDto> Comments { get; set; }
     }
 }
