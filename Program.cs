@@ -8,6 +8,7 @@ using StockMarketWebAPI.Data;
 using StockMarketWebAPI.Interfaces;
 using StockMarketWebAPI.Models;
 using StockMarketWebAPI.Repository;
+using StockMarketWebAPI.Service;
 
 namespace StockMarketWebAPI
 {
@@ -68,6 +69,7 @@ namespace StockMarketWebAPI
 
             builder.Services.AddScoped<IStockRepository, StockRepository>();
             builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
             var app = builder.Build();
 
