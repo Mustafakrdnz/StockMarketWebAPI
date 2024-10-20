@@ -10,6 +10,8 @@ using StockMarketWebAPI.Dtos.Comment;
 using StockMarketWebAPI.Interfaces;
 using StockMarketWebAPI.Models;
 using StockMarketWebAPI.Mappers;
+using Microsoft.AspNetCore.Identity;
+using StockMarketWebAPI.Extensions;
 
 namespace StockMarketWebAPI.Controllers
 {
@@ -19,11 +21,13 @@ namespace StockMarketWebAPI.Controllers
     {
         private readonly ICommentRepository _commentRepo;
         private readonly IStockRepository _stokcRepo;
+        private readonly UserManager<AppUser> _userManager;
 
-        public CommentController(ICommentRepository commentRepo, IStockRepository stockRepo)
+        public CommentController(ICommentRepository commentRepo, IStockRepository stockRepo, UserManager<AppUser> userManager)
         {
             _commentRepo = commentRepo;
             _stokcRepo = stockRepo;
+            _userManager = userManager;
         }
 
         // GET: api/Comment
@@ -94,7 +98,11 @@ namespace StockMarketWebAPI.Controllers
                 return BadRequest("Stock does not exist");
             }
 
+            var username = User.GetUsername();
+            var appUser = await _userManager.FindByNameAsync(username);
+
             var commentModel = commentDto.ToCommentFromCreate(stockId);
+            commentModel.AppUserId = appUser.Id;
             await _commentRepo.CreateAsync(commentModel);
             return CreatedAtAction(nameof(GetComment), new {id = commentModel.Id}, commentModel.ToCommentDto());
         }
